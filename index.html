@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Canvas</title>
+    <link rel="icon" href="https://fav.farm/🔥" />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <canvas id="draw" width="800" height="800"> </canvas>
+    <div class="container">
+      <button id="reset">Reset</button>
+      <button id="erase">Erase</button>
+      <button id="pencil">Pencil</button>
+    </div>
+    <script>
+      const canvas = document.querySelector("#draw");
+      const reset = document.querySelector("#reset");
+      const container = document.querySelector(".container");
+      const erase = document.querySelector("#erase");
+      const pencil = document.querySelector("#pencil");
+
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.strokeStyle = "#BADA55";
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.lineWidth = 30;
+
+      let isDrawing = false;
+      let lineX = 0;
+      let lineY = 0;
+      let hue = 0;
+      let direction = true;
+      let isDelete = true;
+      function hideContainer() {
+        if (isDrawing) {
+          container.classList.add("hide");
+        } else {
+          container.classList.remove("hide");
+        }
+      }
+      reset.addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // isDelete = false;
+      });
+
+      erase.addEventListener("click", () => {
+        isDelete = true;
+        canvas.style.cursor = "grab";
+      });
+
+      pencil.addEventListener("click", () => {
+        isDelete = false;
+        canvas.style.cursor = "crosshair";
+      });
+
+      function draw(e) {
+        if (!isDrawing) return;
+
+        if (!isDelete) {
+          ctx.strokeStyle = `hsl(${hue},50%,50%)`;
+          ctx.beginPath();
+          ctx.moveTo(lineX, lineY);
+          ctx.lineTo(e.offsetX, e.offsetY);
+          ctx.stroke();
+          [lineX, lineY] = [e.offsetX, e.offsetY];
+          hue++;
+          if (hue >= 360) {
+            hue = 0;
+          }
+          if (ctx.lineWidth >= 30 || ctx.lineWidth <= 1) {
+            direction = !direction;
+          }
+
+          if (direction) {
+            ctx.lineWidth++;
+          } else {
+            ctx.lineWidth--;
+          }
+        } else {
+          ctx.clearRect(e.offsetX, e.offsetY, 20, 20);
+        }
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        isDrawing = true;
+        [lineX, lineY] = [e.offsetX, e.offsetY];
+        hideContainer();
+      });
+      canvas.addEventListener("mousemove", draw);
+
+      canvas.addEventListener("mouseup", () => {
+        isDrawing = false;
+        hideContainer();
+      });
+      canvas.addEventListener("mouseout", () => isDrawing == false);
+    </script>
+  </body>
+</html>
